@@ -1,0 +1,17 @@
+plugin: google.cloud.gcp_compute
+projects:
+  - outbreak-info-h5n1
+zones:
+  - us-central1-c
+auth_kind: serviceaccount
+service_account_file: /runner/project/secrets/outbreak-info-h5n1-4327e2e241a0.json
+scopes:
+  - 'https://www.googleapis.com/auth/compute'
+# hostnames:
+#   - name
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+keyed_groups:
+  - prefix: gcp
+    key: labels
+retrieve_image_info: true

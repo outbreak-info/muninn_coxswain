@@ -1,0 +1,8 @@
+---
+- name: List all hosts
+  hosts: all
+  tasks:
+    - name: Foo
+      debug: msg="play_hosts={{ play_hosts }}"
+      run_once: true
+

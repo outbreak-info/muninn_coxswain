@@ -1,0 +1,12 @@
+- name: Run a command on all GCP hosts
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Run uptime
+      ansible.builtin.shell: uptime
+      register: uptime_result
+
+    - name: Print output
+      ansible.builtin.debug:
+        var: uptime_result.stdout
