@@ -22,4 +22,4 @@ dependencies:
 
 additional_build_steps:
   prepend_base:
-    - RUN echo 'prepend base'
+    - ENV ANSIBLE_HOST_KEY_CHECKING=False
