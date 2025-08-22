@@ -4,7 +4,7 @@ projects:
 zones:
   - us-central1-c
 auth_kind: serviceaccount
-service_account_file: /runner/project/secrets/outbreak-info-h5n1-4327e2e241a0.json
+service_account_file: project/secrets/outbreak-info-h5n1-4327e2e241a0.json
 scopes:
   - 'https://www.googleapis.com/auth/compute'
 # hostnames:
