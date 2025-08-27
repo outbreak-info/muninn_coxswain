@@ -52,8 +52,6 @@
         remote_src: yes
         dest: "{{ ansible_env.HOME }}"
 
-
-
 - name: Nginx setup
   hosts: all # todo
   become: yes
