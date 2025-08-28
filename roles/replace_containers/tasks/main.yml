@@ -1,0 +1,33 @@
+---
+- name: Replace containers
+  hosts: all # todo
+  remote_user: james_coxswain
+  vars_files:
+    - /runner/project/secrets/coxswain.env.yml
+  vars:
+    src_dir: "{{ ansible_env.HOME }}/muninn-master"
+  environment:
+    MUNINN_DB_READONLY_USER: "{{ muninn_db_readonly_user }}"
+    MUNINN_DB_READONLY_PASSWORD: "{{ muninn_db_readonly_password }}"
+    MUNINN_DB_SUPERUSER: "{{ muninn_db_superuser }}"
+    MUNINN_DB_SUPERUSER_PASSWORD: "{{ muninn_db_superuser_password }}"
+    MUNINN_DB_NAME: "{{ muninn_db_name }}"
+    MUNINN_DB_HOST: "{{ muninn_db_host }}"
+    MUNINN_DB_PORT: "{{ muninn_db_port }}"
+    MUNINN_DB_PORT_FOR_SERVER: "{{ muninn_db_port_for_server }}"
+    MUNINN_SERVER_PORT: "{{ muninn_server_port }}"
+    MUNINN_SERVER_DATA_INPUT_DIR: "{{ muninn_server_data_input_dir }}"
+    MUNINN_PG_CONFIG_NAME: "{{ muninn_pg_config_name }}"
+    MUNINN_INSTANCE_NAME: "{{ muninn_instance_name }}"
+  tasks:
+    - name: Take down running containers
+      become: true
+      ansible.builtin.shell:
+        chdir: "{{ src_dir }}"
+        cmd: "docker-compose -f docker-compose.yml down"
+
+    - name: Start new containers
+      become: true
+      ansible.builtin.shell:
+        chdir: "{{ src_dir }}"
+        cmd: "docker-compose -f docker-compose.yml up -d --build"

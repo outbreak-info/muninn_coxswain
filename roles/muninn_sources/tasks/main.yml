@@ -1,0 +1,18 @@
+---
+- name: Get muninn sources
+  hosts: all # todo 
+  remote_user: james_coxswain
+  vars:
+    src_dir_name: "muninn-master"
+
+  tasks:
+    - name: Remove sources if present
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/{{ src_dir_name }}"
+        state: absent
+
+    - name: Download muninn
+      ansible.builtin.unarchive:
+        src: https://github.com/outbreak-info/muninn/archive/refs/heads/master.zip
+        remote_src: yes
+        dest: "{{ ansible_env.HOME }}"

@@ -1,0 +1,8 @@
+---
+- name: Update instances
+  roles:
+    - install_dependencies
+    - muninn_sources
+    - replace_containers
+    - nginx
+    

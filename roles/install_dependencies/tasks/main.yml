@@ -1,0 +1,31 @@
+---
+- name: Install dependencies
+  hosts: all # todo
+  remote_user: james_coxswain
+  become: true
+
+  tasks:
+    - name: Apt update
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Install unzip
+      ansible.builtin.apt:
+        name: unzip
+        state: present
+
+    - name: Install docker
+      ansible.builtin.apt:
+        name: docker
+        state: present
+
+    - name: Install docker-compose
+      ansible.builtin.apt:
+        name: docker-compose
+        state: present
+

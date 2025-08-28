@@ -1,0 +1,4 @@
+---
+- name: Create instance
+  roles:
+    - new_gcp_instance

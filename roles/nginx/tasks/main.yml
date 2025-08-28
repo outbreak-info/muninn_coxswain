@@ -1,0 +1,31 @@
+---
+- name: Nginx setup
+  hosts: all # todo
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Copy nginx.conf
+      ansible.builtin.copy:
+        src: /runner/project/nginx.conf
+        dest: /etc/nginx/nginx.conf
+
+    - name: Copy api_proxy.conf
+      ansible.builtin.copy:
+        src: /runner/project/api_proxy.conf
+        dest: /etc/nginx/conf.d/api_proxy.conf
+
+    - name: Ensure api cache exists
+      ansible.builtin.file:
+        path:  /var/cache/nginx/apicache
+        state: directory
+
+    - name: Start nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+        enabled: yes
