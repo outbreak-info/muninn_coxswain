@@ -1,8 +1,11 @@
 ---
 - name: Update instances
+  hosts: all
+  
+  vars:
+    proj_root: /muninn
   roles:
     - install_dependencies
     - muninn_sources
     - replace_containers
     - nginx
-    

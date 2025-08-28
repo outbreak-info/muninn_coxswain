@@ -1,4 +1,4 @@
-- name: Run a command on all GCP hosts
+- name: Print uptime
   hosts: all
   gather_facts: no
 

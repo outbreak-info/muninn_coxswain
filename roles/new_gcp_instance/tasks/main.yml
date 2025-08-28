@@ -5,7 +5,7 @@
 
   vars:
     suffix: ansible-test-1
-    service_account_file: /runner/project/secrets/outbreak-info-h5n1-4327e2e241a0.json
+    service_account_file: "/{{ proj_root }}/secrets/outbreak-info-h5n1-4327e2e241a0.json"
     project: outbreak-info-h5n1
     network_name: muninn-network
     zone: us-central1-c

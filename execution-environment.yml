@@ -23,4 +23,5 @@ dependencies:
 additional_build_steps:
   prepend_base:
     - ENV ANSIBLE_HOST_KEY_CHECKING=False
+    - ENV ANSIBLE_ROLES_PATH="/muninn/roles:$ANSIBLE_ROLES_PATH"
 
