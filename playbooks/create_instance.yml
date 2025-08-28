@@ -4,6 +4,7 @@
   gather_facts: no
 
   vars:
+    proj_root: /muninn
     suffix: ansible-test-1
     service_account_file: "/{{ proj_root }}/secrets/outbreak-info-h5n1-4327e2e241a0.json"
     project: outbreak-info-h5n1
@@ -21,13 +22,22 @@
         name: "boot-disk-{{ suffix }}"
         source_image: projects/debian-cloud/global/images/family/debian-12
         size_gb: 32
+        type: pd-balanced
         project: "{{ project }}"
         zone: "{{ zone }}"
+        state: present
         auth_kind: serviceaccount
         service_account_file: "{{ service_account_file }}"
-        state: present
       register: boot_disk
 
+    - name: Get network info
+      google.cloud.gcp_compute_network_info:
+        filters:
+          - name = "{{ network_name }}"
+        project: "{{ project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ service_account_file }}"
+      register: network_info
 
     - name: Create instance
       google.cloud.gcp_compute_instance:
@@ -36,14 +46,17 @@
         project: "{{ project }}"
         zone: "{{ zone }}"
         disks:
-          source: "{{ boot_disk }}"
-          auto_delete: 'true'
-          boot: 'true'
+          - source: "{{ boot_disk }}"
+            auto_delete: 'true'
+            boot: 'true'
         network_interfaces:
-          - network: "{{ network_name }}"
+          - network: 
+              selfLink: "{{ network_info.resources[0].selfLink }}"
+            access_configs:
+              - name: External NAT
+                type: ONE_TO_ONE_NAT
         tags:
           items: "{{ network_tags }}"
         auth_kind: serviceaccount
         service_account_file: "{{ service_account_file }}"
         state: present
-
