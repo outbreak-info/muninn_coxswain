@@ -1,11 +1,113 @@
 ---
-- name: Update instances
-  hosts: all
-  
+- name: Install dependencies
+  hosts: all # todo
+  remote_user: james_coxswain
+  become: true
+
+  tasks:
+    - name: Apt update
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Install unzip
+      ansible.builtin.apt:
+        name: unzip
+        state: present
+
+    - name: Install docker
+      ansible.builtin.apt:
+        name: docker
+        state: present
+
+    - name: Install docker-compose
+      ansible.builtin.apt:
+        name: docker-compose
+        state: present
+
+- name: Get muninn sources
+  hosts: all # todo 
+  remote_user: james_coxswain
+  vars:
+    src_dir_name: "muninn-master"
+
+  tasks:
+    - name: Remove sources if present
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/{{ src_dir_name }}"
+        state: absent
+
+    - name: Download muninn
+      ansible.builtin.unarchive:
+        src: https://github.com/outbreak-info/muninn/archive/refs/heads/master.zip
+        remote_src: yes
+        dest: "{{ ansible_env.HOME }}"
+
+- name: Replace containers
+  hosts: all # todo
+  remote_user: james_coxswain
+  vars_files:
+    - "{{ proj_root }}/secrets/coxswain.env.yml"
   vars:
     proj_root: /muninn
-  roles:
-    - install_dependencies
-    - muninn_sources
-    - replace_containers
-    - nginx
+    src_dir: "{{ ansible_env.HOME }}/muninn-master"
+  environment:
+    MUNINN_DB_READONLY_USER: "{{ muninn_db_readonly_user }}"
+    MUNINN_DB_READONLY_PASSWORD: "{{ muninn_db_readonly_password }}"
+    MUNINN_DB_SUPERUSER: "{{ muninn_db_superuser }}"
+    MUNINN_DB_SUPERUSER_PASSWORD: "{{ muninn_db_superuser_password }}"
+    MUNINN_DB_NAME: "{{ muninn_db_name }}"
+    MUNINN_DB_HOST: "{{ muninn_db_host }}"
+    MUNINN_DB_PORT: "{{ muninn_db_port }}"
+    MUNINN_DB_PORT_FOR_SERVER: "{{ muninn_db_port_for_server }}"
+    MUNINN_SERVER_PORT: "{{ muninn_server_port }}"
+    MUNINN_SERVER_DATA_INPUT_DIR: "{{ muninn_server_data_input_dir }}"
+    MUNINN_PG_CONFIG_NAME: "{{ muninn_pg_config_name }}"
+    MUNINN_INSTANCE_NAME: "{{ muninn_instance_name }}"
+  tasks:
+    - name: Take down running containers
+      become: true
+      ansible.builtin.shell:
+        chdir: "{{ src_dir }}"
+        cmd: "docker-compose -f docker-compose.yml down"
+
+    - name: Start new containers
+      become: true
+      ansible.builtin.shell:
+        chdir: "{{ src_dir }}"
+        cmd: "docker-compose -f docker-compose.yml up -d --build"
+
+- name: Nginx setup
+  hosts: all # todo
+  become: yes
+
+  tasks:
+    - name: Install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Copy nginx.conf
+      ansible.builtin.copy:
+        src: /runner/project/nginx.conf
+        dest: /etc/nginx/nginx.conf
+
+    - name: Copy api_proxy.conf
+      ansible.builtin.copy:
+        src: /runner/project/api_proxy.conf
+        dest: /etc/nginx/conf.d/api_proxy.conf
+
+    - name: Ensure api cache exists
+      ansible.builtin.file:
+        path:  /var/cache/nginx/apicache
+        state: directory
+
+    - name: Start nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+        enabled: yes
