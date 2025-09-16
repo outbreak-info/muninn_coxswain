@@ -3,7 +3,7 @@
   hosts: all # todo
   remote_user: james_coxswain
   vars_files:
-    - /runner/project/secrets/coxswain.env.yml
+    - "/muninn/secrets/coxswain.env.yml"
   vars:
     src_dir: "{{ ansible_env.HOME }}/muninn-master"
   environment:
