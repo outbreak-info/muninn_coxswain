@@ -1,6 +1,6 @@
 ---
 - name: Hard shutdown containers
-  hosts: all # todo
+  hosts: '{{ target_hosts }}'
   remote_user: james_coxswain
   vars_files:
     - "/muninn/secrets/coxswain.env.yml"

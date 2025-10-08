@@ -1,6 +1,6 @@
 ---
 - name: Install dependencies
-  hosts: all # todo
+  hosts: '{{ target_hosts }}'
   remote_user: james_coxswain
   become: true
 
@@ -19,18 +19,72 @@
         name: unzip
         state: present
 
-    - name: Install docker
+    - name: Install curl
       ansible.builtin.apt:
-        name: docker
+        name: curl
         state: present
 
-    - name: Install docker-compose
+    - name: Install ca-certificates
       ansible.builtin.apt:
-        name: docker-compose
+        name: ca-certificates
         state: present
+
+- name: Install docker
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  become: true
+
+  tasks:
+    - name: Ensure keyrings directory exists
+      ansible.builtin.file:
+        path: "/etc/apt/keyrings"
+        state: directory
+        mode: '755'
+
+    - name: Download docker gpg key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: true
+
+    - name: Add Example repo
+      ansible.builtin.apt_repository:
+        filename: example-repo
+        repo: 'deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable'
+
+    - name: Apt update
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+
+    - name: Install docker-ce-cli
+      ansible.builtin.apt:
+        name: docker-ce-cli
+        state: present
+
+    - name: Install containerd.io
+      ansible.builtin.apt:
+        name: containerd.io
+        state: present
+
+    - name: Install docker-buildx-plugin
+      ansible.builtin.apt:
+        name: docker-buildx-plugin
+        state: present
+
+    - name: Install docker-compose-plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: present
+
 
 - name: Get muninn sources
-  hosts: all # todo 
+  hosts: '{{ target_hosts }}'
   remote_user: james_coxswain
   vars:
     src_dir_name: "muninn-master"
@@ -48,7 +102,7 @@
         dest: "{{ ansible_env.HOME }}"
 
 - name: Replace containers
-  hosts: all # todo
+  hosts: '{{ target_hosts }}'
   remote_user: james_coxswain
   vars_files:
     - "/muninn/secrets/coxswain.env.yml"
@@ -72,7 +126,7 @@
       become: true
       ansible.builtin.shell:
         chdir: "{{ src_dir }}"
-        cmd: "docker-compose -f docker-compose.yml down"
+        cmd: "docker compose -f docker-compose.yml down"
 
     - name: Ensure data dir exists
       ansible.builtin.file:
@@ -83,10 +137,10 @@
       become: true
       ansible.builtin.shell:
         chdir: "{{ src_dir }}"
-        cmd: "docker-compose -f docker-compose.yml up -d --build"
+        cmd: "docker compose -f docker-compose.yml up -d --build"
 
 - name: Nginx setup
-  hosts: all # todo
+  hosts: '{{ target_hosts }}'
   become: yes
   vars:
     proj_root: /muninn

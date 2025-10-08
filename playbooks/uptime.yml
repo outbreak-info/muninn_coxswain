@@ -1,5 +1,5 @@
 - name: Print uptime
-  hosts: all
+  hosts: '{{ target_hosts }}'
   gather_facts: no
 
   tasks:

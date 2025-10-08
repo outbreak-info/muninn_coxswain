@@ -5,12 +5,14 @@
 
   vars:
     proj_root: /muninn
-    suffix: ansible-test-1
+    # the prefix is "muninn-h5n1-"
+    suffix: 8-oct
     service_account_file: "/{{ proj_root }}/secrets/outbreak-info-h5n1-4327e2e241a0.json"
     project: outbreak-info-h5n1
     network_name: muninn-network
     zone: us-central1-c
-    machine_type: e2-highcpu-8
+    machine_type: c4-highcpu-8
+    disk_type: hyperdisk-balanced
     network_tags:
       - http-server
       - lb-health-check
@@ -22,7 +24,7 @@
         name: "boot-disk-{{ suffix }}"
         source_image: projects/debian-cloud/global/images/family/debian-12
         size_gb: 32
-        type: pd-balanced
+        type: "{{ disk_type }}"
         project: "{{ project }}"
         zone: "{{ zone }}"
         state: present
