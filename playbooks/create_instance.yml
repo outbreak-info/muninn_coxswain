@@ -6,7 +6,7 @@
   vars:
     proj_root: /muninn
     # the prefix is "muninn-h5n1-"
-    suffix: 8-oct
+    suffix: 19-nov
     service_account_file: "/{{ proj_root }}/secrets/outbreak-info-h5n1-4327e2e241a0.json"
     project: outbreak-info-h5n1
     network_name: muninn-network

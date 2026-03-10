@@ -48,9 +48,9 @@
         mode: '0644'
         force: true
 
-    - name: Add Example repo
+    - name: Add docker repo
       ansible.builtin.apt_repository:
-        filename: example-repo
+        filename: docker-repo
         repo: 'deb [signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable'
 
     - name: Apt update

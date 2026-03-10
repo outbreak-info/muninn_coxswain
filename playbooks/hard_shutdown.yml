@@ -26,4 +26,4 @@
       become: true
       ansible.builtin.shell:
         chdir: "{{ src_dir }}"
-        cmd: "docker-compose -f docker-compose.yml down -v"
+        cmd: "docker compose -f docker-compose.yml down -v"
