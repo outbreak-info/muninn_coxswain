@@ -9,11 +9,6 @@
       ansible.builtin.apt:
         update_cache: yes
 
-    - name: Install git
-      ansible.builtin.apt:
-        name: git
-        state: present
-
     - name: Install nodejs
       ansible.builtin.apt:
         name: nodejs
@@ -108,6 +103,8 @@
   remote_user: james_coxswain
   vars:
     src_dir_outbreak_h5n1: "{{ ansible_env.HOME }}/outbreak-info-h5n1-main"
+  environment:
+    VITE_API_BASE_URL: /api/
 
   tasks:
     - name: link (outbreak-info-h5n1)
