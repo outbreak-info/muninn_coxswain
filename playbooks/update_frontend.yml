@@ -1,0 +1,121 @@
+---
+- name: Install dependencies
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  become: true
+
+  tasks:
+    - name: Apt update
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+
+    - name: Install nodejs
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+
+    - name: Install npm
+      ansible.builtin.apt:
+        name: npm
+        state: present
+
+- name: Set up npm
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  vars:
+    npm_packages_dir: "{{ ansible_env.HOME }}/npm-packages"
+
+  tasks:
+    - name: Create dir npm-packages
+      ansible.builtin.file:
+        path: "{{ npm_packages_dir }}"
+        state: directory
+
+    - name: Set prefix
+      ansible.builtin.shell:
+        cmd: |
+          npm config set prefix "{{ npm_packages_dir }}"
+
+    - name: Ensure block in .bashrc
+      ansible.builtin.blockinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"
+        create: yes
+        block: |
+          export PATH="$PATH:{{ npm_packages_dir }}/bin"
+          export MANPATH="${MANPATH-$(manpath)}:{{ npm_packages_dir }}/share/man"
+
+
+# todo: fix path in nginx config
+- name: Get outbreak sources
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  vars:
+    src_dir_name_js_outbreak: "js-outbreak-master"
+    src_dir_name_outbreak_h5n1: "outbreak-info-h5n1-main"
+
+  tasks:
+    - name: Remove sources if present (js-outbreak)
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/{{ src_dir_name_js_outbreak }}"
+        state: absent
+
+    - name: Remove sources if present (outbreak-info-h5n1)
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/{{ src_dir_name_outbreak_h5n1 }}"
+        state: absent
+
+    - name: Download sources (js-outbreak)
+      ansible.builtin.unarchive:
+        src: https://github.com/outbreak-info/js-outbreak/archive/refs/heads/master.zip
+        remote_src: yes
+        dest: "{{ ansible_env.HOME }}"
+
+    - name: Download sources (outbreak-info-h5n1)
+      ansible.builtin.unarchive:
+        src: https://github.com/outbreak-info/outbreak-info-h5n1/archive/refs/heads/main.zip
+        remote_src: yes
+        dest: "{{ ansible_env.HOME }}"
+
+- name: Set up js-outbreak
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  vars:
+    src_dir_js_outbreak: "{{ ansible_env.HOME }}/js-outbreak-master"
+
+  tasks:
+    - name: install (js-outbreak)
+      ansible.builtin.shell:
+        chdir: "{{ src_dir_js_outbreak }}"
+        cmd: "npm install"
+
+    - name: run build (js-outbreak)
+      ansible.builtin.shell:
+        chdir: "{{ src_dir_js_outbreak }}"
+        cmd: "npm run build"
+
+    - name: link (js-outbreak)
+      ansible.builtin.shell:
+        chdir: "{{ src_dir_js_outbreak }}"
+        cmd: "npm link"
+
+- name: Set up outbreak-info-h5n1
+  hosts: '{{ target_hosts }}'
+  remote_user: james_coxswain
+  vars:
+    src_dir_outbreak_h5n1: "{{ ansible_env.HOME }}/outbreak-info-h5n1-main"
+
+  tasks:
+    - name: link (outbreak-info-h5n1)
+      ansible.builtin.shell:
+        chdir: "{{ src_dir_outbreak_h5n1 }}"
+        cmd: "npm link outbreakInfo"
+
+    - name: run build (outbreak-info-h5n1)
+      ansible.builtin.shell:
+        chdir: "{{ src_dir_outbreak_h5n1 }}"
+        cmd: "npm run build"

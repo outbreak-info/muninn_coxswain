@@ -5,8 +5,8 @@
 
   vars:
     proj_root: /muninn
-    # the prefix is "muninn-h5n1-"
-    suffix: 19-nov
+    # the prefix is "muninn-"
+    suffix: "test-16-mar"
     service_account_file: "/{{ proj_root }}/secrets/outbreak-info-h5n1-4327e2e241a0.json"
     project: outbreak-info-h5n1
     network_name: muninn-network
@@ -43,7 +43,7 @@
 
     - name: Create instance
       google.cloud.gcp_compute_instance:
-        name: "muninn-h5n1-{{ suffix }}"
+        name: "muninn-{{ suffix }}"
         machine_type: "{{ machine_type }}"
         project: "{{ project }}"
         zone: "{{ zone }}"
