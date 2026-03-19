@@ -58,6 +58,9 @@ ansible-playbook /muninn/playbooks/create_instance.yml \
 -e "suffix=hello-world"
 ```
 
+To change boot disk size provide `-e "boot_disk_size_gb=32`. 
+Default is 32.
+
 
 ### Update muninn on existing instances
 

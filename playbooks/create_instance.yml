@@ -17,13 +17,14 @@
       - http-server
       - lb-health-check
       - muninn
+    boot_disk_size_gb: 32
 
   tasks:
     - name: Create disk
       google.cloud.gcp_compute_disk:
         name: "boot-disk-{{ suffix }}"
         source_image: projects/debian-cloud/global/images/family/debian-12
-        size_gb: 32
+        size_gb: "{{ boot_disk_size_gb }}"
         type: "{{ disk_type }}"
         project: "{{ project }}"
         zone: "{{ zone }}"
