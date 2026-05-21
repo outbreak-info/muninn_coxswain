@@ -116,3 +116,25 @@ For now, ingestion is a very manual process.
 **Adding instances to load balancers:**
 New instances need to be added to an instance group to associate them with a LB and make them accessible at a domain name. 
 This is done manually through the google cloud console.
+
+## Data Ingestion
+
+muninn_coxswain does not take care of data ingestion for you, but here are the steps involved. 
+This is a guide to moving data from an existing instance of muninn to a new instance in GCP.
+We assume you already have a running database with all the data you want ingested.
+Note that the database in GCP must be set up with the same user and database names as the database you are copying from. 
+
+1. Create the database dump.
+This has three parts.
+	1. `docker exec -d <instance name>_pg bash -c 'pg_dump -U <user> -d <db name> --section=pre-data -f /muninn/data/<name your file, include the date>.pre.sql'`
+	2. `docker exec -d <instance name>_pg bash -c 'pg_dump -U <user> -d <db name> --section=post-data -f /muninn/data/<name your file, include the date>.post.sql'`
+	3. `docker exec -d <instance name>_pg bash -c 'pg_dump -U <user> -d <db name> --section=data -f /muninn/data/<name your file, include the date>.data.sql'`  
+2. Compress the outputs  
+`tar -czvf <name with date>_tripartite_dump.tar.gz /your/muninn/bound/dir/<name should be shared>.*.sql`
+3. Transfer to the GCP instance, move to the bound directory, and decompress
+4. run the sql files
+	1. `docker exec -it <instance name>_pg psql -U <user> -d <db> -f /muninn/data/<file name>.pre.sql`
+	2. `docker exec -it <instance name>_pg psql -U <user> -d <db> -f /muninn/data/<file name>.data.sql` Note, you might want to run this one with `-d` to avoid being chained to your ssh session. 
+	3. `docker exec -it <instance name>_pg psql -U <user> -d <db> -f /muninn/data/<file name>.post.sql`
+
+
