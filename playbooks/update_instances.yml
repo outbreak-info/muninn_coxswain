@@ -121,23 +121,32 @@
     MUNINN_SERVER_DATA_INPUT_DIR: "{{ muninn_server_data_input_dir }}"
     MUNINN_PG_CONFIG_NAME: "{{ muninn_pg_config_name }}"
     MUNINN_INSTANCE_NAME: "{{ muninn_instance_name }}"
+    MUNINN_PG_DATA_BIND_DIR: "{{ muninn_pg_data_bind_dir }}"
+    MUNINN_PG_SHM_SIZE: "{{ muninn_pg_shm_size }}"
+    MUNINN_N_API_WORKERS: "{{ muninn_n_api_workers }}"
   tasks:
     - name: Take down running containers
       become: true
       ansible.builtin.shell:
         chdir: "{{ src_dir }}"
-        cmd: "docker compose -f docker-compose.yml down"
+        cmd: "docker compose -f docker-compose.bind-pg-data.yml down"
 
     - name: Ensure data dir exists
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/data"
+        path: "{{ muninn_server_data_input_dir }}"
         state: directory
+
+    - name: Ensure pg data dir exists
+      ansible.builtin.file:
+        path: "{{ muninn_pg_data_bind_dir }}"
+        state: directory
+        mode: '777'
 
     - name: Start new containers
       become: true
       ansible.builtin.shell:
         chdir: "{{ src_dir }}"
-        cmd: "docker compose -f docker-compose.yml up -d --build"
+        cmd: "docker compose -f docker-compose.bind-pg-data.yml up -d --build"
 
 - name: Nginx setup
   hosts: '{{ target_hosts }}'
